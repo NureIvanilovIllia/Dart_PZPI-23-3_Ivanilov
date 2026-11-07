@@ -1,0 +1,9 @@
+name: fleet_service
+description: Розбір, перевірка й агрегація журналу технічного обслуговування автопарку.
+version: 1.0.0
+
+environment:
+  sdk: ^3.13.4
+
+dev_dependencies:
+  lints: ^6.0.0
