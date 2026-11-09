@@ -1,6 +1,7 @@
 import 'package:fleet_service/data.dart';
 import 'package:fleet_service/parser.dart';
 import 'package:fleet_service/pipelines.dart';
+import 'package:fleet_service/report.dart';
 import 'package:fleet_service/validator.dart';
 
 const costThreshold = 1500.0;
@@ -20,4 +21,16 @@ void main() {
   print('\nВиконавець “$contractor”:');
   print('Сума: ${costs.total.toStringAsFixed(2)}');
   print('Середня вартість: ${costs.average.toStringAsFixed(2)}');
+
+  print('');
+  print(buildReport(services));
+  print(
+    buildReport(
+      services,
+      title: 'Найдешевші роботи',
+      top: 3,
+      descending: false,
+      withGroups: false,
+    ),
+  );
 }
