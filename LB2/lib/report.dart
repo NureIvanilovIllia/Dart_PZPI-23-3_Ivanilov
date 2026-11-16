@@ -1,6 +1,5 @@
 import 'plate.dart';
 import 'service.dart';
-import 'validator.dart';
 
 /// Скільки записів показує звіт за замовчуванням.
 const defaultTopCount = 5;
@@ -17,10 +16,15 @@ Map<String, List<Service>> groupByWork(List<Service> services) {
   return groups;
 }
 
-/// Сума вартості по кожній групі.
-Map<String, double> totalsByWork(Map<String, List<Service>> groups) => {
+/// Кількість записів і сума вартості по кожній групі.
+Map<String, ({int count, double total})> statsByWork(
+  Map<String, List<Service>> groups,
+) => {
   for (final group in groups.entries)
-    group.key: group.value.fold(0.0, (sum, s) => sum + s.cost),
+    group.key: (
+      count: group.value.length,
+      total: group.value.fold(0.0, (sum, s) => sum + s.cost),
+    ),
 };
 
 /// Критерій сортування: вартість роботи.
@@ -58,10 +62,9 @@ String buildReport(
 
   if (withGroups) {
     buffer.writeln('Витрати за типами робіт:');
-    final groups = groupByWork(services);
-    totalsByWork(groups).forEach((type, total) {
+    statsByWork(groupByWork(services)).forEach((type, stats) {
       buffer.writeln(
-        '  $type – ${groups[type]!.length} шт., ${total.toStringAsFixed(2)}',
+        '  $type – ${stats.count} шт., ${stats.total.toStringAsFixed(2)}',
       );
     });
   }
@@ -73,20 +76,14 @@ String buildReport(
     by: by,
     descending: descending,
   ).take(top);
-  var number = 1;
-  for (final s in sorted) {
+  for (final (index, s) in sorted.indexed) {
     buffer.writeln(
-      '  ${number++}. ${s.plate}, ${s.workType}, ${s.mileage} км, '
+      '  ${index + 1}. ${s.plate}, ${s.workType}, ${s.mileage} км, '
       '${s.cost.toStringAsFixed(2)}',
     );
   }
   return buffer.toString();
 }
-
-DateTime _day(DateTime d) => DateTime.utc(d.year, d.month, d.day);
-
-/// Вік запису в днях відносно [referenceDate].
-int ageInDays(Service s) => _day(referenceDate).difference(_day(s.date)).inDays;
 
 /// Рядки про [count] найсвіжіших робіт, номери приховано.
 List<String> recentLines(
@@ -96,6 +93,7 @@ List<String> recentLines(
   final byDate = [...services]..sort((a, b) => b.date.compareTo(a.date));
   return [
     for (final s in byDate.take(count))
-      '${maskPlate(s.plate)}, ${s.workType}, ${ageInDays(s)} дн. тому',
+      '${maskPlate(s.plate)}, ${s.workType}, '
+          '${s.ageInDays(referenceDate)} дн. тому',
   ];
 }

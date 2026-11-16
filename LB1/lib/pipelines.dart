@@ -11,7 +11,7 @@ List<String> expensiveLabels(List<Service> services, double threshold) =>
     services
         .where((s) => s.cost > threshold)
         .map((s) => '${s.plate} – ${s.workType}')
-        .fold(<String>[], (list, label) => list..add(label));
+        .toList();
 
 /// Сума і середня вартість робіт виконавця [contractor].
 ({double total, double average}) contractorCosts(
