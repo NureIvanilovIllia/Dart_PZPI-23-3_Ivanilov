@@ -1,4 +1,6 @@
+import 'contractor.dart';
 import 'plate.dart';
+import 'work.dart';
 
 /// Роздільник полів у вхідному рядку.
 const fieldSeparator = ';';
@@ -19,8 +21,8 @@ class const Service({
   /// Держномер автомобіля.
   required final String plate,
 
-  /// Тип виконаних робіт.
-  required final String workType,
+  /// Вид виконаних робіт.
+  required final Work work,
 
   /// Пробіг автомобіля в кілометрах.
   required final int mileage,
@@ -32,7 +34,7 @@ class const Service({
   required final double cost,
 
   /// Виконавець робіт.
-  required final String contractor,
+  required final Contractor contractor,
 }) {
   /// Розбирає рядок [line] формату
   /// `держномер;тип робіт;пробіг;дата;вартість;виконавець`.
@@ -45,8 +47,9 @@ class const Service({
 
   /// Розбирає рядок [line] так само, як [Service.fromCsv].
   ///
-  /// Повертає `null`, якщо полів не шість, пробіг чи вартість не є числами
-  /// або дата не існує чи не відповідає формату РРРР-ММ-ДД.
+  /// Повертає `null`, якщо полів не шість, пробіг чи вартість не є числами,
+  /// дата не існує чи не відповідає формату РРРР-ММ-ДД або виконавця немає
+  /// серед [Contractor].
   static Service? tryParse(String line) {
     final parts = line
         .split(fieldSeparator)
@@ -58,16 +61,22 @@ class const Service({
       final mileageText,
       final dateText,
       final costText,
-      final contractor,
+      final contractorTitle,
     ]) {
       final mileage = int.tryParse(mileageText);
       final date = _parseDate(dateText);
       final cost = double.tryParse(costText);
-      if (mileage == null || date == null || cost == null) return null;
+      final contractor = Contractor.byTitle(contractorTitle);
+      if (mileage == null ||
+          date == null ||
+          cost == null ||
+          contractor == null) {
+        return null;
+      }
 
       return Service(
         plate: plate,
-        workType: workType,
+        work: Work.fromName(workType),
         mileage: mileage,
         date: date,
         cost: cost,
@@ -98,20 +107,19 @@ class const Service({
   bool operator ==(Object other) =>
       other is Service &&
       plate == other.plate &&
-      workType == other.workType &&
+      work == other.work &&
       mileage == other.mileage &&
       date == other.date &&
       cost == other.cost &&
       contractor == other.contractor;
 
   @override
-  int get hashCode =>
-      Object.hash(plate, workType, mileage, date, cost, contractor);
+  int get hashCode => Object.hash(plate, work, mileage, date, cost, contractor);
 
   @override
   String toString() =>
-      'Service($plate, $workType, $mileage км, ${_isoDate(date)}, '
-      '${cost.toStringAsFixed(2)}, $contractor)';
+      'Service($plate, ${work.name}, $mileage км, ${_isoDate(date)}, '
+      '${cost.toStringAsFixed(2)}, ${contractor.title})';
 }
 
 String _isoDate(DateTime date) =>

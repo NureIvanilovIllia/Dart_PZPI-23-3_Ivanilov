@@ -1,5 +1,6 @@
 import 'plate.dart';
 import 'service.dart';
+import 'work.dart';
 
 /// Скільки записів показує звіт за замовчуванням.
 const defaultTopCount = 5;
@@ -11,7 +12,7 @@ const defaultRecentCount = 3;
 Map<String, List<Service>> groupByWork(List<Service> services) {
   final groups = <String, List<Service>>{};
   for (final s in services) {
-    groups.putIfAbsent(s.workType, () => []).add(s);
+    groups.putIfAbsent(s.work.name, () => []).add(s);
   }
   return groups;
 }
@@ -78,12 +79,17 @@ String buildReport(
   ).take(top);
   for (final (index, s) in sorted.indexed) {
     buffer.writeln(
-      '  ${index + 1}. ${s.plate}, ${s.workType}, ${s.mileage} км, '
+      '  ${index + 1}. ${s.plate}, ${s.work.name}, ${s.mileage} км, '
       '${s.cost.toStringAsFixed(2)}',
     );
   }
   return buffer.toString();
 }
+
+/// Рядок про наступне обслуговування цього виду робіт після запису [s].
+String nextServiceLine(Service s) =>
+    '${s.plate}, ${s.work.name} – на ${s.work.nextServiceAt(s.mileage)} км '
+    '(${categoryOf(s.work)})';
 
 /// Рядки про [count] найсвіжіших робіт, номери приховано.
 List<String> recentLines(
@@ -93,7 +99,7 @@ List<String> recentLines(
   final byDate = [...services]..sort((a, b) => b.date.compareTo(a.date));
   return [
     for (final s in byDate.take(count))
-      '${maskPlate(s.plate)}, ${s.workType}, '
+      '${maskPlate(s.plate)}, ${s.work.name}, '
           '${s.ageInDays(referenceDate)} дн. тому',
   ];
 }

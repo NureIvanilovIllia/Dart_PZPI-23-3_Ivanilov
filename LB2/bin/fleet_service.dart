@@ -1,3 +1,4 @@
+import 'package:fleet_service/contractor.dart';
 import 'package:fleet_service/counter.dart';
 import 'package:fleet_service/data.dart';
 import 'package:fleet_service/pipelines.dart';
@@ -8,7 +9,7 @@ import 'package:fleet_service/service.dart';
 const costThreshold = 1500.0;
 
 /// Виконавець, для якого рахуються суми.
-const contractor = 'СТО Мотор';
+const contractor = Contractor.motor;
 
 /// Кількість записів у коротких звітах.
 const shortListCount = 3;
@@ -35,7 +36,7 @@ void main() {
   print('Разом: ${expensiveTotal(services, costThreshold).toStringAsFixed(2)}');
 
   final costs = contractorCosts(services, contractor);
-  print('\nВиконавець “$contractor”:');
+  print('\nВиконавець “${contractor.title}”:');
   print('Сума: ${costs.total.toStringAsFixed(2)}');
   print('Середня вартість: ${costs.average.toStringAsFixed(2)}');
 
@@ -62,4 +63,11 @@ void main() {
 
   print('\nНайсвіжіші роботи:');
   recentLines(services).forEach(print);
+
+  print('\nНаступне обслуговування:');
+  sortServices(
+    services,
+    by: mileageOf,
+    descending: true,
+  ).take(shortListCount).map(nextServiceLine).forEach(print);
 }

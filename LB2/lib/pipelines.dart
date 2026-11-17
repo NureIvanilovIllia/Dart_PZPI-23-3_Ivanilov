@@ -1,3 +1,4 @@
+import 'contractor.dart';
 import 'service.dart';
 
 /// Сума вартості робіт дорожчих за [threshold].
@@ -10,13 +11,13 @@ double expensiveTotal(List<Service> services, double threshold) => services
 List<String> expensiveLabels(List<Service> services, double threshold) =>
     services
         .where((s) => s.cost > threshold)
-        .map((s) => '${s.plate} – ${s.workType}')
+        .map((s) => '${s.plate} – ${s.work.name}')
         .toList();
 
 /// Сума і середня вартість робіт виконавця [contractor].
 ({double total, double average}) contractorCosts(
   List<Service> services,
-  String contractor,
+  Contractor contractor,
 ) {
   final costs = services
       .where((s) => s.contractor == contractor)
