@@ -18,3 +18,4 @@ linter:
     - prefer_single_quotes
     - directives_ordering
     - avoid_dynamic_calls
+    - use_declaring_parameters

@@ -10,35 +10,30 @@ const isoDateLength = 10;
 final referenceDate = DateTime(2026, 11, 7);
 
 /// Один запис про технічне обслуговування автомобіля.
-class Service {
+///
+/// Записи порівнюються за значенням: два записи з однаковими полями рівні.
+// Первинний конструктор описано в цьому коментарі, окремого місця для /// у
+// нього немає.
+// ignore: public_member_api_docs
+class const Service({
   /// Держномер автомобіля.
-  final String plate;
+  required final String plate,
 
   /// Тип виконаних робіт.
-  final String workType;
+  required final String workType,
 
   /// Пробіг автомобіля в кілометрах.
-  final int mileage;
+  required final int mileage,
 
   /// Дата виконання робіт.
-  final DateTime date;
+  required final DateTime date,
 
   /// Вартість робіт.
-  final double cost;
+  required final double cost,
 
   /// Виконавець робіт.
-  final String contractor;
-
-  /// Створює запис із вже розібраних значень.
-  const Service({
-    required this.plate,
-    required this.workType,
-    required this.mileage,
-    required this.date,
-    required this.cost,
-    required this.contractor,
-  });
-
+  required final String contractor,
+}) {
   /// Розбирає рядок [line] формату
   /// `держномер;тип робіт;пробіг;дата;вартість;виконавець`.
   ///
@@ -98,6 +93,20 @@ class Service {
   /// Вік запису в днях відносно дати [reference].
   int ageInDays(DateTime reference) =>
       _day(reference).difference(_day(date)).inDays;
+
+  @override
+  bool operator ==(Object other) =>
+      other is Service &&
+      plate == other.plate &&
+      workType == other.workType &&
+      mileage == other.mileage &&
+      date == other.date &&
+      cost == other.cost &&
+      contractor == other.contractor;
+
+  @override
+  int get hashCode =>
+      Object.hash(plate, workType, mileage, date, cost, contractor);
 
   @override
   String toString() =>
