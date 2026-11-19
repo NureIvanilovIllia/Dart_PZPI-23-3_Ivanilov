@@ -1,4 +1,5 @@
 import 'package:fleet_service/plate.dart';
+import 'package:fleet_service/report.dart';
 import 'package:fleet_service/repository.dart';
 import 'package:fleet_service/service.dart';
 import 'package:fleet_service/work.dart';
@@ -47,7 +48,19 @@ void main() {
   test('гарантія є в заміни й шин, але не в діагностики', () {
     expect(Work.fromName('Заміна масла'), isA<Warranty>());
     expect(Work.fromName('Діагностика'), isNot(isA<Warranty>()));
-    expect((Work.fromName('Шиномонтаж') as Warranty).covers(30), isTrue);
+    expect(
+      Work.fromName('Шиномонтаж'),
+      isA<Warranty>().having((w) => w.covers(30), 'covers(30)', isTrue),
+    );
+  });
+
+  test('costClass розбирає вартість і вид робіт разом', () {
+    Service at(String work, String cost) =>
+        Service.fromCsv('AX1234BC;$work;1;2026-03-14;$cost;СТО Мотор');
+    expect(costClass(at('Діагностика', '600')), 'дешева');
+    expect(costClass(at('Заміна масла', '1850.50')), 'звичайна');
+    expect(costClass(at('Заміна масла', '3200')), 'дорога з гарантією');
+    expect(costClass(at('Діагностика', '3200')), 'дорога');
   });
 
   test('сховище знаходить запис за id', () {

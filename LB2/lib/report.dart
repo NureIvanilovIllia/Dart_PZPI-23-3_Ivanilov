@@ -8,6 +8,23 @@ const defaultTopCount = 5;
 /// Скільки найсвіжіших робіт показує [recentLines] за замовчуванням.
 const defaultRecentCount = 3;
 
+/// Вартість, нижче якої робота вважається дешевою.
+const cheapLimit = 1000.0;
+
+/// Вартість, від якої робота вважається дорогою.
+const expensiveLimit = 3000.0;
+
+/// Клас вартості запису [s].
+///
+/// Вартість і вид робіт розбираються разом як запис; гілка з `when` відділяє
+/// дорогі роботи з гарантією від решти дорогих.
+String costClass(Service s) => switch ((s.cost, s.work)) {
+  (< cheapLimit, _) => 'дешева',
+  (final cost, Warranty()) when cost >= expensiveLimit => 'дорога з гарантією',
+  (>= expensiveLimit, _) => 'дорога',
+  _ => 'звичайна',
+};
+
 /// Групує записи за типом робіт.
 Map<String, List<Service>> groupByWork(List<Service> services) {
   final groups = <String, List<Service>>{};
@@ -63,11 +80,11 @@ String buildReport(
 
   if (withGroups) {
     buffer.writeln('Витрати за типами робіт:');
-    statsByWork(groupByWork(services)).forEach((type, stats) {
-      buffer.writeln(
-        '  $type – ${stats.count} шт., ${stats.total.toStringAsFixed(2)}',
-      );
-    });
+    for (final MapEntry(key: type, value: (:count, :total)) in statsByWork(
+      groupByWork(services),
+    ).entries) {
+      buffer.writeln('  $type – $count шт., ${total.toStringAsFixed(2)}');
+    }
   }
 
   final direction = descending ? 'спадання' : 'зростання';

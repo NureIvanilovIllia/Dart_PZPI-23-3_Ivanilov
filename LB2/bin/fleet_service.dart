@@ -78,6 +78,13 @@ void main() {
   print('\nДіюча гарантія:');
   warrantyLines(services).forEach(print);
 
+  print('\nКласи вартості:');
+  final classes = <String, int>{};
+  for (final s in services) {
+    classes.update(costClass(s), (n) => n + 1, ifAbsent: () => 1);
+  }
+  classes.forEach((name, n) => print('  $name – $n'));
+
   final repo = Repository<Service>();
   services.forEach(repo.add);
   print('\nСховище:');
