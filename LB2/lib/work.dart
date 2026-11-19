@@ -26,13 +26,32 @@ sealed class Work {
   int nextServiceAt(int mileage) => mileage + intervalKm;
 }
 
+/// Гарантія на виконані роботи.
+///
+/// Обмеження `on Work` відкриває домішці [Work.name] і не дає підмішати
+/// гарантію до класу поза ієрархією робіт.
+mixin Warranty on Work {
+  /// Тривалість гарантії в днях.
+  int get warrantyDays;
+
+  /// Чи діє гарантія, якщо роботи виконано [ageInDays] днів тому.
+  bool covers(int ageInDays) => ageInDays <= warrantyDays;
+
+  /// Рядок про залишок гарантії на ці роботи.
+  String describe(int ageInDays) =>
+      '$name – гарантія ще ${warrantyDays - ageInDays} дн.';
+}
+
 /// Заміна вузла або витратного матеріалу.
-final class Replacement extends Work {
+final class Replacement extends Work with Warranty {
   /// Створює заміну з назвою [name].
   const Replacement(super.name);
 
   @override
   int get intervalKm => 15000;
+
+  @override
+  int get warrantyDays => 180;
 }
 
 /// Діагностика без заміни деталей.
@@ -45,12 +64,15 @@ final class Diagnostics extends Work {
 }
 
 /// Робота з шинами й підвіскою.
-final class TyreService extends Work {
+final class TyreService extends Work with Warranty {
   /// Створює шинну роботу з назвою [name].
   const TyreService(super.name);
 
   @override
   int get intervalKm => 20000;
+
+  @override
+  int get warrantyDays => 30;
 }
 
 const _known = <Work>[
@@ -63,8 +85,12 @@ const _known = <Work>[
 ];
 
 /// Категорія робіт для звітів.
+///
+/// Домішка [Warranty] оголошена з `on Work`, тому сама є підтипом [Work] і
+/// `switch` має її покрити. Після [TyreService] серед типів із гарантією
+/// лишається тільки [Replacement].
 String categoryOf(Work work) => switch (work) {
-  Replacement() => 'заміна вузлів',
   Diagnostics() => 'діагностика',
   TyreService() => 'шини',
+  Warranty() => 'заміна вузлів',
 };

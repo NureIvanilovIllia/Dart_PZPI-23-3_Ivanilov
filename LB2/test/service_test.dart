@@ -1,3 +1,5 @@
+import 'package:fleet_service/plate.dart';
+import 'package:fleet_service/repository.dart';
 import 'package:fleet_service/service.dart';
 import 'package:fleet_service/work.dart';
 import 'package:test/test.dart';
@@ -35,5 +37,23 @@ void main() {
   test('наступне обслуговування залежить від підтипу', () {
     expect(Work.fromName('Заміна масла').nextServiceAt(152300), 167300);
     expect(categoryOf(Work.fromName('Діагностика')), 'діагностика');
+  });
+
+  test('masked ховає цифри держномера, інші рядки лишає', () {
+    expect('AX1234BC'.masked, 'AX****BC');
+    expect('ZZ99'.masked, 'ZZ99');
+  });
+
+  test('гарантія є в заміни й шин, але не в діагностики', () {
+    expect(Work.fromName('Заміна масла'), isA<Warranty>());
+    expect(Work.fromName('Діагностика'), isNot(isA<Warranty>()));
+    expect((Work.fromName('Шиномонтаж') as Warranty).covers(30), isTrue);
+  });
+
+  test('сховище знаходить запис за id', () {
+    final service = Service.fromCsv(line);
+    final repo = Repository<Service>()..add(service);
+    expect(repo.findById(service.id), service);
+    expect(repo.findById('немає'), isNull);
   });
 }

@@ -3,6 +3,7 @@ import 'package:fleet_service/counter.dart';
 import 'package:fleet_service/data.dart';
 import 'package:fleet_service/pipelines.dart';
 import 'package:fleet_service/report.dart';
+import 'package:fleet_service/repository.dart';
 import 'package:fleet_service/service.dart';
 
 /// Поріг вартості для вибірки дорогих робіт.
@@ -10,6 +11,9 @@ const costThreshold = 1500.0;
 
 /// Виконавець, для якого рахуються суми.
 const contractor = Contractor.motor;
+
+/// Номер, за яким шукаємо записи в сховищі.
+const searchedPlate = 'AX1234BC';
 
 /// Кількість записів у коротких звітах.
 const shortListCount = 3;
@@ -70,4 +74,16 @@ void main() {
     by: mileageOf,
     descending: true,
   ).take(shortListCount).map(nextServiceLine).forEach(print);
+
+  print('\nДіюча гарантія:');
+  warrantyLines(services).forEach(print);
+
+  final repo = Repository<Service>();
+  services.forEach(repo.add);
+  print('\nСховище:');
+  print(
+    'Записів для $searchedPlate: '
+    '${repo.where((s) => s.plate == searchedPlate).length}',
+  );
+  print('Перший запис за id: ${repo.findById(services.first.id)}');
 }

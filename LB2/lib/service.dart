@@ -1,5 +1,6 @@
 import 'contractor.dart';
 import 'plate.dart';
+import 'repository.dart';
 import 'work.dart';
 
 /// Роздільник полів у вхідному рядку.
@@ -35,7 +36,7 @@ class const Service({
 
   /// Виконавець робіт.
   required final Contractor contractor,
-}) {
+}) implements Identifiable {
   /// Розбирає рядок [line] формату
   /// `держномер;тип робіт;пробіг;дата;вартість;виконавець`.
   ///
@@ -98,6 +99,9 @@ class const Service({
 
   /// Чи запис пройшов перевірку діапазонів.
   bool get isValid => violations.isEmpty;
+
+  @override
+  String get id => '$plate/${_isoDate(date)}/${work.name}';
 
   /// Вік запису в днях відносно дати [reference].
   int ageInDays(DateTime reference) =>

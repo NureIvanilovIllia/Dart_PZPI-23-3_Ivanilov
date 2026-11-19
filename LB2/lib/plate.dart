@@ -9,8 +9,11 @@ const maskChar = '*';
 
 final _digit = RegExp(r'\d');
 
-/// Замінює цифри номера в [plate] зірочками, регіон і серію лишає.
-///
-/// Рядок, що не відповідає [plateFormat], повертається без змін.
-String maskPlate(String plate) =>
-    plateFormat.hasMatch(plate) ? plate.replaceAll(_digit, maskChar) : plate;
+/// Методи для держномерів, записаних рядком.
+extension PlateString on String {
+  /// Рядок із зірочками замість цифр, якщо це держномер за [plateFormat].
+  ///
+  /// Будь-який інший рядок повертається без змін.
+  String get masked =>
+      plateFormat.hasMatch(this) ? replaceAll(_digit, maskChar) : this;
+}

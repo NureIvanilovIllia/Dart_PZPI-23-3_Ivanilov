@@ -96,10 +96,22 @@ List<String> recentLines(
   List<Service> services, {
   int count = defaultRecentCount,
 }) {
-  final byDate = [...services]..sort((a, b) => b.date.compareTo(a.date));
   return [
-    for (final s in byDate.take(count))
-      '${maskPlate(s.plate)}, ${s.work.name}, '
+    for (final s in _newestFirst(services).take(count))
+      '${s.plate.masked}, ${s.work.name}, '
           '${s.ageInDays(referenceDate)} дн. тому',
   ];
 }
+
+/// Рядки про [count] найсвіжіших робіт, на які ще діє гарантія.
+List<String> warrantyLines(
+  List<Service> services, {
+  int count = defaultRecentCount,
+}) => [
+  for (final s in _newestFirst(services))
+    if (s.work case final Warranty w when w.covers(s.ageInDays(referenceDate)))
+      '${s.plate}, ${w.describe(s.ageInDays(referenceDate))}',
+].take(count).toList();
+
+List<Service> _newestFirst(List<Service> services) =>
+    [...services]..sort((a, b) => b.date.compareTo(a.date));
